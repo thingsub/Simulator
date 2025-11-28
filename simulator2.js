@@ -1,9 +1,9 @@
-// 관절 아래버전
+// 오리지널 버전
 // 로봇 제어 로직을 담는 Raccoon 클래스 (이전과 동일)
 class Raccoon {
-  #minEncoderJoint1 = -30;
+  #minEncoderJoint1 = 0;
   #maxEncoderJoint1 = 150;
-  #minEncoderJoint2 = -10;
+  #minEncoderJoint2 = 0;
   #maxEncoderJoint2 = 170;
   #angleSpeedOffset = 10;
   #intervalId = null;
@@ -135,13 +135,10 @@ class Raccoon {
 }
 
 const J1_J2_LIMIT_TABLE = [
-  { j1: -30, j2min: 5, j2max: 170 },
-   { j1: -15, j2min: -5, j2max: 170 },
-  { j1: 0, j2min: 5, j2max: 170 },
+  { j1: 0, j2min: 5, j2max: 180 },
   { j1: 30, j2min: 10, j2max: 170 },
-  { j1: 45, j2min: 15, j2max: 170 },
-  { j1: 60, j2min: 20, j2max: 170 },
-  { j1: 70, j2min: 25, j2max: 170 },
+  { j1: 60, j2min: 25, j2max: 170 },
+  { j1: 70, j2min: 35, j2max: 170 },
   { j1: 90, j2min: 45, j2max: 170 },
   { j1: 100, j2min: 50, j2max: 170 },
   { j1: 120, j2min: 60, j2max: 170 },
@@ -180,19 +177,22 @@ const ForeArm_H = 762 * IMG_SCALE;
 // 새로 제공된 픽셀 좌표 (스케일 적용)
 // -----------------------------------------------------
 
+//  J2의 Y축 위치를 J1 대비 5.0 픽셀 위로 이동 (예시)
+const J2_Y_CORRECTION = 0; // 양수 값: J2를 위로 이동 (Y축 감소)
+
 // UpperArm 픽셀 좌표 (스케일 적용)
 const UA_J1_X = 123 * IMG_SCALE; // 24.6
 const UA_J1_Y = 286 * IMG_SCALE; // 57.2
 
 const UA_J2_X = 676 * IMG_SCALE; // 135.2
-const UA_J2_Y = 128 * IMG_SCALE; // 25.6
+const UA_J2_Y_NEW = 128 * IMG_SCALE - J2_Y_CORRECTION;
 
 // ForeArm 픽셀 좌표 (스케일 적용)
 const FA_PEN_X = 194 * IMG_SCALE; // 38.8
-const FA_PEN_Y = 148 * IMG_SCALE; // 29.6
+const FA_PEN_Y_NEW = 148 * IMG_SCALE - J2_Y_CORRECTION;
 
 const FA_J2_X = 777 * IMG_SCALE; // 155.4
-const FA_J2_Y = 375 * IMG_SCALE; // 75.0
+const FA_J2_Y_NEW = 375 * IMG_SCALE - J2_Y_CORRECTION;
 
 // Body 이미지에서의 J1 위치 (이전 값 유지)
 const TOP_J1_LOCAL_X = 30; // 렌더링용 오프셋
@@ -208,7 +208,7 @@ const J1_PIVOT_Y_IN_UPPERARM = UA_J1_Y; // 57.2
 
 // ForeArm 이미지의 렌더링 오프셋: (0,0)이 팔꿈치(J2) 좌표에 오도록 조정
 const J2_PIVOT_X_IN_FOREARM = FA_J2_X; // 155.4
-const J2_PIVOT_Y_IN_FOREARM = FA_J2_Y; // 75.0
+const J2_PIVOT_Y_IN_FOREARM = FA_J2_Y_NEW; // 75.0
 
 // 새로운 기구학적 길이 정의: 이미지의 피벗 거리 사용 (L1, L2 대신)
 // L1: UpperArm의 J1 피벗과 J2 피벗 사이의 X 거리
@@ -298,13 +298,14 @@ let p5sketch = new p5((p) => {
 
     // elbow position
     const elbowX = L1;
-    const elbowY = 0;
+     const elbowY = UA_J2_Y_NEW - UA_J1_Y;
+    // const elbowY = 0;
 
     // -------------------------
     // Forearm
     // -------------------------
     p.push();
-    p.translate(elbowX, elbowY);
+    p.translate(elbowX, elbowY - 0);
     p.rotate(J2_rad);
 
     if (assetsLoaded) {
@@ -333,7 +334,7 @@ let p5sketch = new p5((p) => {
     const total_angle_rad = -J1_rad + J2_rad;
 
     const local_pen_x = FA_PEN_X - FA_J2_X; //  수정: 펜촉 - 팔꿈치 X
-    const local_pen_y = FA_PEN_Y - FA_J2_Y; //  수정: 펜촉 - 팔꿈치 Y
+    const local_pen_y = FA_PEN_Y_NEW - FA_J2_Y_NEW - 0; //  수정: 펜촉 - 팔꿈치 Y
 
     const forearm_offset_x =
       local_pen_x * p.cos(total_angle_rad) -
@@ -342,8 +343,8 @@ let p5sketch = new p5((p) => {
       local_pen_x * p.sin(total_angle_rad) +
       local_pen_y * p.cos(total_angle_rad);
 
-    const EE_abs_x_relative = J2_abs_x_relative + forearm_offset_x - 0;
-    const EE_abs_y_relative = J2_abs_y_relative + forearm_offset_y + 0;
+    const EE_abs_x_relative = J2_abs_x_relative + forearm_offset_x;
+    const EE_abs_y_relative = J2_abs_y_relative + forearm_offset_y - 30;
 
     // -------------------------
     // End Effector Drawing
@@ -411,7 +412,7 @@ const zoomResetButton = document.getElementById("zoom_reset_button"); // 추가�
 
 const updateJoint1 = (value) => {
   const numVal = parseInt(value);
-  const clampedVal = Math.min(145, Math.max(-30, numVal));
+  const clampedVal = Math.min(145, Math.max(0, numVal));
   slider1.value = clampedVal;
   input1.value = clampedVal;
   raccoon.moveByAngle(clampedVal, raccoon.targetAngleJoint2);

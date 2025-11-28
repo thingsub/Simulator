@@ -1,10 +1,10 @@
-// 관절 아래버전
+// Original Version
 // 로봇 제어 로직을 담는 Raccoon 클래스 (이전과 동일)
 class Raccoon {
   #minEncoderJoint1 = -30;
-  #maxEncoderJoint1 = 150;
+  #maxEncoderJoint1 = 180;
   #minEncoderJoint2 = -10;
-  #maxEncoderJoint2 = 170;
+  #maxEncoderJoint2 = 90;
   #angleSpeedOffset = 10;
   #intervalId = null;
 
@@ -72,12 +72,6 @@ class Raccoon {
       Math.max(allowedJ2Range.min, targetAngleJoint2)
     );
 
-    // // 조합 제한 적용
-    // const allowed = this.getAllowedJ2Range(targetAngleJoint1);
-
-    // if (targetAngleJoint2 < allowed.min) targetAngleJoint2 = allowed.min;
-    // if (targetAngleJoint2 > allowed.max) targetAngleJoint2 = allowed.max;
-
     this.targetAngleJoint1 = targetAngleJoint1;
     this.targetAngleJoint2 = targetAngleJoint2;
   }
@@ -135,18 +129,18 @@ class Raccoon {
 }
 
 const J1_J2_LIMIT_TABLE = [
-  { j1: -30, j2min: 5, j2max: 170 },
-   { j1: -15, j2min: -5, j2max: 170 },
-  { j1: 0, j2min: 5, j2max: 170 },
-  { j1: 30, j2min: 10, j2max: 170 },
-  { j1: 45, j2min: 15, j2max: 170 },
-  { j1: 60, j2min: 20, j2max: 170 },
-  { j1: 70, j2min: 25, j2max: 170 },
-  { j1: 90, j2min: 45, j2max: 170 },
-  { j1: 100, j2min: 50, j2max: 170 },
-  { j1: 120, j2min: 60, j2max: 170 },
-  { j1: 140, j2min: 75, j2max: 170 },
-  { j1: 145, j2min: 75, j2max: 170 },
+  { j1: -30, j2min: 5, j2max: 90 },
+  { j1: -15, j2min: -5, j2max: 90 },
+  { j1: 0, j2min: 5, j2max: 90 },
+  { j1: 30, j2min: -10, j2max: 90 },
+  { j1: 45, j2min: -10, j2max: 90 },
+  { j1: 60, j2min: 10, j2max: 90 },
+  { j1: 70, j2min: 15, j2max: 90 },
+  { j1: 90, j2min: 45, j2max: 90 },
+  { j1: 100, j2min: 50, j2max: 90 },
+  { j1: 120, j2min: 45, j2max: 90 },
+  { j1: 140, j2min: 50, j2max: 90 },
+  { j1: 145, j2min: 55, j2max: 90 },
 ];
 
 const raccoon = new Raccoon(40);
@@ -182,21 +176,21 @@ const ForeArm_H = 762 * IMG_SCALE;
 
 // UpperArm 픽셀 좌표 (스케일 적용)
 const UA_J1_X = 123 * IMG_SCALE; // 24.6
-const UA_J1_Y = 286 * IMG_SCALE; // 57.2
+const UA_J1_Y = 295 * IMG_SCALE; // 57.2
 
 const UA_J2_X = 676 * IMG_SCALE; // 135.2
 const UA_J2_Y = 128 * IMG_SCALE; // 25.6
 
 // ForeArm 픽셀 좌표 (스케일 적용)
-const FA_PEN_X = 194 * IMG_SCALE; // 38.8
-const FA_PEN_Y = 148 * IMG_SCALE; // 29.6
+const FA_PEN_X = 190 * IMG_SCALE; // 38.8
+const FA_PEN_Y = 310 * IMG_SCALE; // 29.6
 
 const FA_J2_X = 777 * IMG_SCALE; // 155.4
-const FA_J2_Y = 375 * IMG_SCALE; // 75.0
+const FA_J2_Y = 535 * IMG_SCALE; // 75.0
 
 // Body 이미지에서의 J1 위치 (이전 값 유지)
 const TOP_J1_LOCAL_X = 30; // 렌더링용 오프셋
-const TOP_J1_LOCAL_Y = Top_H - 35; // 렌더링용 오프셋
+const TOP_J1_LOCAL_Y = Top_H + 0; // 렌더링용 오프셋
 
 // -----------------------------------------------------
 //  렌더링 피벗 (J1, J2 이미지의 (0,0)을 어디에 맞출지)
@@ -260,26 +254,6 @@ let p5sketch = new p5((p) => {
     p.scale(canvasScale);
 
     // -------------------------
-    // BODY
-    // -------------------------
-    p.push();
-    p.translate(shoulderX, shoulderY);
-    if (assetsLoaded) {
-      p.rotate(p.PI);
-      p.image(
-        topAsset,
-        -TOP_J1_LOCAL_X - 15,
-        -TOP_J1_LOCAL_Y + 20,
-        Top_W,
-        Top_H
-      );
-    }
-    p.fill(50, 50, 150);
-    // 남색 공
-    p.ellipse(0, 0, 15, 15);
-    p.pop();
-
-    // -------------------------
     // Upper Arm
     // -------------------------
     p.push();
@@ -298,7 +272,7 @@ let p5sketch = new p5((p) => {
 
     // elbow position
     const elbowX = L1;
-    const elbowY = 0;
+    const elbowY = -32;
 
     // -------------------------
     // Forearm
@@ -311,7 +285,7 @@ let p5sketch = new p5((p) => {
       p.image(
         foreArmAsset,
         -J2_PIVOT_X_IN_FOREARM,
-        -J2_PIVOT_Y_IN_FOREARM - 0,
+        -J2_PIVOT_Y_IN_FOREARM + 32,
         ForeArm_W,
         ForeArm_H
       );
@@ -320,15 +294,19 @@ let p5sketch = new p5((p) => {
     p.pop();
 
     p.fill(255, 100, 0);
-    p.ellipse(elbowX, elbowY, 15, 15);
+    // p.ellipse(elbowX, elbowY, 15, 15);
 
     p.pop();
 
     // -------------------------
     // End Effector 계산
     // -------------------------
-    const J2_abs_x_relative = L1 * p.cos(-J1_rad);
-    const J2_abs_y_relative = L1 * p.sin(-J1_rad);
+    // const J2_abs_x_relative = L1 * p.cos(-J1_rad);
+    // const J2_abs_y_relative = L1 * p.sin(-J1_rad);
+
+    const J2_abs_x_relative =
+      elbowX * p.cos(-J1_rad) - elbowY * p.sin(-J1_rad) - 10; // elbowX*cos + (-elbowY)*sin  // 이거 -10 빼봐도 됨
+    const J2_abs_y_relative = elbowX * p.sin(-J1_rad) + elbowY * p.cos(-J1_rad); // elbowX*sin + elbowY*cos
 
     const total_angle_rad = -J1_rad + J2_rad;
 
@@ -349,12 +327,14 @@ let p5sketch = new p5((p) => {
     // End Effector Drawing
     // -------------------------
     p.fill(255, 0, 0);
+    /*
     p.ellipse(
-      shoulderX + EE_abs_x_relative,
+      shoulderX + EE_abs_x_relative + 10,
       shoulderY + EE_abs_y_relative,
       15,
       15
     );
+*/
 
     // Path
     if (isPenDown) {
@@ -378,6 +358,28 @@ let p5sketch = new p5((p) => {
     }
 
     p.pop();
+
+    // -------------------------
+    // BODY
+    // -------------------------
+    p.push();
+    p.translate(shoulderX, shoulderY);
+    if (assetsLoaded) {
+      p.rotate(p.PI);
+      p.image(
+        topAsset,
+        -TOP_J1_LOCAL_X - 15,
+        -TOP_J1_LOCAL_Y + 50,
+        Top_W,
+        Top_H
+      );
+    }
+    p.fill(50, 50, 150);
+    // 남색 공
+    // p.ellipse(0, 0, 15, 15);
+    p.pop();
+
+    // -------------------------
 
     document.getElementById("x_end_display").textContent =
       EE_abs_x_relative.toFixed(2);
@@ -411,7 +413,7 @@ const zoomResetButton = document.getElementById("zoom_reset_button"); // 추가�
 
 const updateJoint1 = (value) => {
   const numVal = parseInt(value);
-  const clampedVal = Math.min(145, Math.max(-30, numVal));
+  const clampedVal = Math.min(180, Math.max(-30, numVal));
   slider1.value = clampedVal;
   input1.value = clampedVal;
   raccoon.moveByAngle(clampedVal, raccoon.targetAngleJoint2);

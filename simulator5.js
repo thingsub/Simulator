@@ -268,7 +268,7 @@ let p5sketch = new p5((p) => {
       p.rotate(p.PI);
       p.image(
         topAsset,
-        -TOP_J1_LOCAL_X - 15,
+        -TOP_J1_LOCAL_X - 45,
         -TOP_J1_LOCAL_Y + 20,
         Top_W,
         Top_H

@@ -48,13 +48,13 @@
         <h2 class="font-semibold text-indigo-700">Joint 1 (어깨) - Motor 0</h2>
 
         <div class="flex items-center">
-          <span class="control-label text-xs">목표 각도 (0~150°):</span>
+          <span class="control-label text-xs">목표 각도 (-30~180°):</span>
 
           <input
             type="range"
             id="targetAngle1_slider"
-            min="0"
-            max="150"
+            min="-30"
+            max="180"
             value="45"
             step="1"
             class="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer"
@@ -72,8 +72,8 @@
           <input
             type="number"
             id="targetAngle1_input"
-            min="0"
-            max="150"
+            min="-30"
+            max="180"
             value="0"
             step="1"
             class="w-16 p-1 border rounded text-sm text-right font-mono focus:ring-indigo-500 focus:border-indigo-500"
@@ -85,13 +85,13 @@
         <h2 class="font-semibold text-red-700">Joint 2 (팔꿈치) - Motor 1</h2>
 
         <div class="flex items-center">
-          <span class="control-label text-xs">목표 각도 (-10~100°):</span>
+          <span class="control-label text-xs">목표 각도 (-10~90°):</span>
 
           <input
             type="range"
             id="targetAngle2_slider"
             min="-10"
-            max="100"
+            max="90"
             value="45"
             step="1"
             class="w-full h-2 bg-red-200 rounded-lg appearance-none cursor-pointer"
@@ -110,7 +110,7 @@
             type="number"
             id="targetAngle2_input"
             min="-10"
-            max="100"
+            max="90"
             value="0"
             step="1"
             class="w-16 p-1 border rounded text-sm text-right font-mono focus:ring-red-500 focus:border-red-500"
@@ -214,6 +214,6 @@
       <div id="p5-canvas" class="w-full h-full min-h-[400px]"></div>
     </div>
 
-    <script type="module" src="simulator.js"></script>
+    <script src="simulator3.js"></script>
   </body>
 </html>
